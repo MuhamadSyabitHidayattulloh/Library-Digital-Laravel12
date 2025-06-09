@@ -1,0 +1,190 @@
+@extends('admin.layouts.admin')
+
+@section('title', $book->title)
+
+@section('admin-content')
+<div class="max-w-4xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Book Details</h1>
+        <div class="flex items-center space-x-3">
+            <a href="{{ route('admin.books.edit', $book) }}"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+                <i class="ph-pencil-bold mr-2"></i>
+                Edit Book
+            </a>
+            <button onclick="window.print()"
+                class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                <i class="ph-printer-bold mr-2"></i>
+                Print Details
+            </button>
+            <a href="{{ route('admin.books.index') }}" class="text-gray-600 hover:text-gray-800">Back to List</a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6">
+            <div class="grid grid-cols-2 gap-6">
+                <!-- Basic Information -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Book Information</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Title</label>
+                            <p class="mt-1 text-gray-800 font-medium">{{ $book->title }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Author</label>
+                            <p class="mt-1 text-gray-800">{{ $book->author }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Publisher</label>
+                            <p class="mt-1 text-gray-800">{{ $book->publisher }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Publication Year</label>
+                            <p class="mt-1 text-gray-800">{{ $book->publication_year }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">ISBN</label>
+                            <p class="mt-1 text-gray-800">{{ $book->isbn }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Description</label>
+                            <p class="mt-1 text-gray-600">{{ $book->description }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Information -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Status Information</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Category</label>
+                            <p class="mt-1">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-50 text-blue-800">
+                                    {{ $book->category->name }}
+                                </span>
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Stock Status</label>
+                            <p class="mt-1">
+                                @if($book->stock > 0)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-50 text-green-800">
+                                        <i class="ph-check-circle-bold mr-1"></i> {{ $book->stock }} copies available
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-red-50 text-red-800">
+                                        <i class="ph-x-circle-bold mr-1"></i> Out of Stock
+                                    </span>
+                                @endif
+                            </p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Borrow Statistics</label>
+                            <div class="mt-1 grid grid-cols-2 gap-4">
+                                <div class="bg-gray-50 rounded p-3">
+                                    <p class="text-sm text-gray-500">Active Borrows</p>
+                                    <p class="text-xl font-semibold text-gray-800 mt-1">
+                                        {{ $book->borrows()->where('status', 'borrowed')->count() }}
+                                    </p>
+                                </div>
+                                <div class="bg-gray-50 rounded p-3">
+                                    <p class="text-sm text-gray-500">Total Borrows</p>
+                                    <p class="text-xl font-semibold text-gray-800 mt-1">
+                                        {{ $book->borrows()->count() }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Borrows -->
+            <div class="mt-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Borrows</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-100">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Borrow Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100">
+                            @forelse($book->borrows as $borrow)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">
+                                                {{ $borrow->user->name }}
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                {{ $borrow->user->email }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $borrow->borrow_date->format('M d, Y') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $borrow->return_date->format('M d, Y') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @switch($borrow->status)
+                                        @case('pending')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-800">
+                                                Pending
+                                            </span>
+                                            @break
+                                        @case('borrowed')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-800">
+                                                Borrowed
+                                            </span>
+                                            @break
+                                        @case('returned')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-800">
+                                                Returned
+                                            </span>
+                                            @break
+                                        @case('overdue')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-800">
+                                                Overdue
+                                            </span>
+                                            @break
+                                    @endswitch
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <a href="{{ route('admin.borrows.show', $borrow) }}" class="text-blue-600 hover:text-blue-900">View Details</a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    No borrow records found for this book.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    nav, footer, .no-print { display: none !important; }
+    .shadow-sm { box-shadow: none !important; }
+    .border { border: none !important; }
+}
+</style>
+@endsection
