@@ -154,4 +154,15 @@ class BookController extends Controller
     {
         return view('admin.books.print-detail', compact('book'));
     }
+
+    /**
+     * Display the specified book for users.
+     */
+    public function userShow(Book $book)
+    {
+        // Load the book with its category and reviews
+        $book->load(['category', 'reviews.user']);
+
+        return view('user.books.show', compact('book'));
+    }
 }

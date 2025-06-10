@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BorrowController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes
@@ -49,6 +50,11 @@ Route::middleware(['auth', 'role:user'])->name('user.')->prefix('user')->group(f
     // User book routes
     Route::get('/books', [BookController::class, 'userIndex'])->name('books.index');
     Route::get('/books/{book}', [BookController::class, 'userShow'])->name('books.show');
+
+    // User review routes
+    Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.update');
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
     // User borrow routes
     Route::post('/borrows', [BorrowController::class, 'store'])->name('borrows.store');

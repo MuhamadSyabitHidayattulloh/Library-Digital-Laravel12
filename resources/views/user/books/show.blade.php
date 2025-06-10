@@ -125,6 +125,96 @@
                 @endif
             </div>
         </div>
+
+        <!-- Reviews Section -->
+        <div class="border-t border-gray-200 mt-8 pt-8 px-6 pb-6">
+            <div class="max-w-3xl mx-auto">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Reviews</h2>
+
+                <!-- Review Form -->
+                <div class="bg-gray-50 rounded-xl p-6 mb-8">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Write a Review</h3>
+                    <form action="{{ route('user.reviews.store', $book) }}" method="POST" class="space-y-4">
+                        @csrf
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="rating">
+                                Rating
+                            </label>
+                            <div class="flex items-center space-x-2">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="rating" value="{{ $i }}" class="hidden peer">
+                                        <i class="ph-star-bold text-2xl peer-checked:text-yellow-400 text-gray-300 hover:text-yellow-400 transition-colors"></i>
+                                    </label>
+                                @endfor
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="comment">
+                                Your Review
+                            </label>
+                            <textarea id="comment" name="comment" rows="4" required
+                                class="w-full px-4 py-2 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                                placeholder="Share your thoughts about this book..."></textarea>
+                        </div>
+
+                        <button type="submit"
+                            class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                            Submit Review
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Reviews List -->
+                <div class="space-y-6">
+                    @forelse($book->reviews as $review)
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <div class="flex items-center mb-1">
+                                        <!-- Stars -->
+                                        <div class="flex text-yellow-400">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                @if($i <= $review->rating)
+                                                    <i class="ph-star-fill"></i>
+                                                @else
+                                                    <i class="ph-star text-gray-300"></i>
+                                                @endif
+                                            @endfor
+                                        </div>
+                                        <span class="ml-2 text-sm text-gray-600">
+                                            {{ $review->created_at->diffForHumans() }}
+                                        </span>
+                                    </div>
+                                    <p class="font-medium text-gray-900">{{ $review->user->name }}</p>
+                                </div>
+
+                                @if($review->user_id === auth()->id())
+                                    <div class="flex items-center space-x-2">
+                                        <button onclick="editReview({{ $review->id }})"
+                                            class="text-sm text-blue-600 hover:text-blue-800">
+                                            Edit
+                                        </button>
+                                        <form action="{{ route('user.reviews.destroy', $review) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-sm text-red-600 hover:text-red-800">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <p class="text-gray-600">{{ $review->comment }}</p>
+                        </div>
+                    @empty
+                        <p class="text-center text-gray-500 py-8">No reviews yet. Be the first to review this book!</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -146,5 +236,58 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+function editReview(reviewId) {
+    const reviewElement = document.querySelector(`#review-${reviewId}`);
+    const comment = reviewElement.querySelector('.review-comment').textContent;
+    const rating = reviewElement.querySelector('.review-rating').value;
+
+    // Create edit form
+    const form = document.createElement('form');
+    form.action = `/user/reviews/${reviewId}`;
+    form.method = 'POST';
+    form.innerHTML = `
+        @csrf
+        @method('PUT')
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                <div class="flex items-center space-x-2">
+                    ${Array.from({length: 5}, (_, i) => `
+                        <label class="cursor-pointer">
+                            <input type="radio" name="rating" value="${i + 1}"
+                                ${rating == i + 1 ? 'checked' : ''} class="hidden peer">
+                            <i class="ph-star-bold text-2xl peer-checked:text-yellow-400 text-gray-300
+                                hover:text-yellow-400 transition-colors"></i>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Your Review</label>
+                <textarea name="comment" rows="4" required
+                    class="w-full px-4 py-2 rounded-lg border-gray-300 focus:border-blue-500
+                    focus:ring-2 focus:ring-blue-200">${comment}</textarea>
+            </div>
+            <div class="flex space-x-2">
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg
+                    hover:bg-blue-700 transition-colors">
+                    Update Review
+                </button>
+                <button type="button" onclick="cancelEdit(${reviewId})"
+                    class="px-4 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg
+                    hover:bg-gray-300 transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    `;
+
+    reviewElement.querySelector('.review-content').replaceWith(form);
+}
+
+function cancelEdit(reviewId) {
+    location.reload();
+}
 </script>
 @endsection
