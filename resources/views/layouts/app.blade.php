@@ -229,5 +229,30 @@
             </div>
         </div>
     </footer>
+
+    <!-- Minnit Chat Widget with Toggle -->
+    <div class="fixed bottom-4 right-4 z-50" x-data="{ isOpen: false }">
+        <!-- Chat Toggle Button -->
+        <button @click="isOpen = !isOpen"
+                class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 mb-2"
+                :class="{ 'rotate-45': isOpen }">
+            <i class="ph-chat-circle-text-fill text-2xl" x-show="!isOpen"></i>
+            <i class="ph-x-bold text-2xl" x-show="isOpen"></i>
+        </button>
+
+        <!-- Chat Widget -->
+        <div x-show="isOpen"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-90"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-90">
+            <script src="https://minnit.chat/js/embed.js?c=1740011833" defer></script>
+            <span class="minnit-chat-sembed shadow-lg rounded-lg overflow-hidden block"
+                  data-chatname="https://organizations.minnit.chat/436870699504787/Main?embed"
+                  data-style="width:400px; height:500px;">Chat</span>
+        </div>
+    </div>
 </body>
 </html>
