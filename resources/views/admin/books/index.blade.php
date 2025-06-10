@@ -79,8 +79,8 @@
         <div class="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
             <!-- Book Cover -->
             <div class="relative aspect-[3/4] bg-gray-100 overflow-hidden">
-                @if($book->cover_image)
-                    <img src="{{ $book->cover_image }}" alt="{{ $book->title }}"
+                @if($book->cover_url)
+                    <img src="{{ $book->cover_url }}" alt="{{ $book->title }}"
                          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                          style="object-position: center;">
                 @else

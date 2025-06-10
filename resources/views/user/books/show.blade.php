@@ -18,8 +18,8 @@
             <div class="space-y-6">
                 <!-- Cover Image -->
                 <div class="aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg">
-                    @if($book->cover_image)
-                        <img src="{{ $book->cover_image }}" alt="{{ $book->title }}"
+                    @if($book->cover_url)
+                        <img src="{{ $book->cover_url }}" alt="{{ $book->title }}"
                              class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full flex items-center justify-center">

@@ -6,10 +6,10 @@
 <div class="max-w-2xl mx-auto">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-semibold">Edit Book</h1>
-        <a href="{{ route('books.index') }}" class="text-gray-600 hover:text-gray-800">Back to List</a>
+        <a href="{{ route('admin.books.index') }}" class="text-gray-600 hover:text-gray-800">Back to List</a>
     </div>
 
-    <form action="{{ route('books.update', $book) }}" method="POST" class="bg-white rounded-lg shadow p-6">
+    <form action="{{ route('admin.books.update', $book) }}" method="POST" class="bg-white rounded-lg shadow p-6" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <div class="grid grid-cols-2 gap-6">
@@ -91,10 +91,63 @@
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
+
+            <div class="col-span-2">
+                <label class="block text-gray-700 font-medium mb-2">Cover Image</label>
+                <div class="space-y-4">
+                    @if($book->cover_url)
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-600 mb-2">Current Cover:</p>
+                            <img src="{{ $book->cover_url }}" alt="Current cover" class="h-40 object-contain rounded-lg border">
+                        </div>
+                    @endif
+
+                    <div class="flex items-center space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="cover_type" value="keep" class="form-radio"
+                                {{ old('cover_type', 'keep') === 'keep' ? 'checked' : '' }}>
+                            <span class="ml-2">Keep Current</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="cover_type" value="url" class="form-radio"
+                                {{ old('cover_type') === 'url' ? 'checked' : '' }}>
+                            <span class="ml-2">New URL</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="cover_type" value="file" class="form-radio"
+                                {{ old('cover_type') === 'file' ? 'checked' : '' }}>
+                            <span class="ml-2">Upload New</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="cover_type" value="none" class="form-radio"
+                                {{ old('cover_type') === 'none' ? 'checked' : '' }}>
+                            <span class="ml-2">Remove Cover</span>
+                        </label>
+                    </div>
+
+                    <div id="urlInput" class="{{ old('cover_type') !== 'url' ? 'hidden' : '' }}">
+                        <input type="url" name="cover_url" value="{{ old('cover_url') }}"
+                            class="w-full px-3 py-2 border rounded-lg @error('cover_url') border-red-500 @enderror"
+                            placeholder="https://example.com/book-cover.jpg">
+                        @error('cover_url')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div id="fileInput" class="{{ old('cover_type') !== 'file' ? 'hidden' : '' }}">
+                        <input type="file" name="cover_file" accept="image/*"
+                            class="w-full px-3 py-2 border rounded-lg @error('cover_file') border-red-500 @enderror">
+                        <p class="text-sm text-gray-500 mt-1">Max file size: 2MB. Supported formats: JPG, PNG, GIF</p>
+                        @error('cover_file')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="mt-6 flex justify-end space-x-3">
-            <a href="{{ route('books.index') }}"
+            <a href="{{ route('admin.books.index') }}"
                 class="px-4 py-2 text-gray-700 hover:text-gray-900">
                 Cancel
             </a>
@@ -104,4 +157,25 @@
         </div>
     </form>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const coverTypeInputs = document.querySelectorAll('input[name="cover_type"]');
+    const urlInput = document.getElementById('urlInput');
+    const fileInput = document.getElementById('fileInput');
+
+    function toggleInputs() {
+        const selectedType = document.querySelector('input[name="cover_type"]:checked').value;
+        urlInput.classList.toggle('hidden', selectedType !== 'url');
+        fileInput.classList.toggle('hidden', selectedType !== 'file');
+    }
+
+    coverTypeInputs.forEach(input => {
+        input.addEventListener('change', toggleInputs);
+    });
+});
+</script>
+@endpush
+
 @endsection

@@ -9,7 +9,7 @@
         <a href="{{ route('admin.books.index') }}" class="text-gray-600 hover:text-gray-800">Back to List</a>
     </div>
 
-    <form action="{{ route('admin.books.store') }}" method="POST" class="bg-white rounded-lg shadow p-6">
+    <form action="{{ route('admin.books.store') }}" method="POST" class="bg-white rounded-lg shadow p-6" enctype="multipart/form-data">
         @csrf
         <div class="grid grid-cols-2 gap-6">
             <div class="col-span-2">
@@ -91,6 +91,42 @@
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
+
+            <div class="col-span-2">
+                <label class="block text-gray-700 font-medium mb-2">Cover Image</label>
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="cover_type" value="url" class="form-radio"
+                                {{ old('cover_type', 'url') === 'url' ? 'checked' : '' }}>
+                            <span class="ml-2">Image URL</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="cover_type" value="file" class="form-radio"
+                                {{ old('cover_type') === 'file' ? 'checked' : '' }}>
+                            <span class="ml-2">Upload File</span>
+                        </label>
+                    </div>
+
+                    <div id="urlInput" class="{{ old('cover_type', 'url') !== 'url' ? 'hidden' : '' }}">
+                        <input type="url" name="cover_url" value="{{ old('cover_url') }}"
+                            class="w-full px-3 py-2 border rounded-lg @error('cover_url') border-red-500 @enderror"
+                            placeholder="https://example.com/book-cover.jpg">
+                        @error('cover_url')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div id="fileInput" class="{{ old('cover_type') !== 'file' ? 'hidden' : '' }}">
+                        <input type="file" name="cover_file" accept="image/*"
+                            class="w-full px-3 py-2 border rounded-lg @error('cover_file') border-red-500 @enderror">
+                        <p class="text-sm text-gray-500 mt-1">Max file size: 2MB. Supported formats: JPG, PNG, GIF</p>
+                        @error('cover_file')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="mt-6 flex justify-end space-x-3">
@@ -98,11 +134,31 @@
                 class="px-4 py-2 text-gray-700 hover:text-gray-900">
                 Cancel
             </a>
-            <button type="submit"
-                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                 Add Book
             </button>
         </div>
     </form>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const coverTypeInputs = document.querySelectorAll('input[name="cover_type"]');
+    const urlInput = document.getElementById('urlInput');
+    const fileInput = document.getElementById('fileInput');
+
+    function toggleInputs() {
+        const selectedType = document.querySelector('input[name="cover_type"]:checked').value;
+        urlInput.classList.toggle('hidden', selectedType !== 'url');
+        fileInput.classList.toggle('hidden', selectedType !== 'file');
+    }
+
+    coverTypeInputs.forEach(input => {
+        input.addEventListener('change', toggleInputs);
+    });
+});
+</script>
+@endpush
+
 @endsection

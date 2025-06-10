@@ -37,8 +37,8 @@
         <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden">
             <!-- Book Cover with Gradient Overlay -->
             <div class="relative aspect-[4/5] bg-gradient-to-br from-blue-50 to-indigo-50 overflow-hidden">
-                @if($book->cover_image)
-                    <img src="{{ $book->cover_image }}" alt="{{ $book->title }}"
+                @if($book->cover_url)
+                    <img src="{{ $book->cover_url }}" alt="{{ $book->title }}"
                          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 @else
                     <div class="w-full h-full flex items-center justify-center">
@@ -80,7 +80,7 @@
             <!-- Book Info -->
             <div class="p-4 flex-1 flex flex-col">
                 <div class="flex-1">
-                    <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+                    <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
                         {{ $book->title }}
                     </h3>
                     <p class="text-sm text-gray-600 mt-1">by {{ $book->author }}</p>

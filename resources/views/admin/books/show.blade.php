@@ -23,9 +23,23 @@
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-6">
-            <div class="grid grid-cols-2 gap-6">
-                <!-- Basic Information -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Cover Image -->
                 <div>
+                    @if($book->cover_url)
+                        <img src="{{ $book->cover_url }}" alt="{{ $book->title }}" class="w-full rounded-lg shadow-lg">
+                    @else
+                        <div class="w-full aspect-[3/4] rounded-lg bg-gray-100 flex items-center justify-center">
+                            <div class="text-center text-gray-400">
+                                <i class="ph-book-bold text-5xl mb-2"></i>
+                                <p class="text-sm">No Cover</p>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Basic Information -->
+                <div class="lg:col-span-2">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Book Information</h3>
                     <div class="space-y-4">
                         <div>

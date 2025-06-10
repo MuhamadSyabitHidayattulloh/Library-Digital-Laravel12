@@ -96,8 +96,16 @@ class BookController extends Controller
             'description' => 'nullable|string',
             'isbn' => 'required|string|unique:books',
             'stock' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id'
+            'category_id' => 'required|exists:categories,id',
+            'cover_type' => 'required|in:url,file',
+            'cover_url' => 'required_if:cover_type,url|nullable|url',
+            'cover_file' => 'required_if:cover_type,file|nullable|image|max:2048'
         ]);
+
+        if ($request->cover_type === 'file' && $request->hasFile('cover_file')) {
+            $path = $request->file('cover_file')->store('covers', 'public');
+            $validated['cover_url'] = asset('storage/' . $path);
+        }
 
         Book::create($validated);
         return redirect()->route('admin.books.index')->with('success', 'Book added successfully!');
@@ -125,8 +133,18 @@ class BookController extends Controller
             'description' => 'nullable|string',
             'isbn' => 'required|string|unique:books,isbn,' . $book->id,
             'stock' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id'
+            'category_id' => 'required|exists:categories,id',
+            'cover_type' => 'nullable|in:url,file,none',
+            'cover_url' => 'required_if:cover_type,url|nullable|url',
+            'cover_file' => 'required_if:cover_type,file|nullable|image|max:2048'
         ]);
+
+        if ($request->cover_type === 'file' && $request->hasFile('cover_file')) {
+            $path = $request->file('cover_file')->store('covers', 'public');
+            $validated['cover_url'] = asset('storage/' . $path);
+        } elseif ($request->cover_type === 'none') {
+            $validated['cover_url'] = null;
+        }
 
         $book->update($validated);
         return redirect()->route('admin.books.index')->with('success', 'Book updated successfully!');
@@ -164,5 +182,14 @@ class BookController extends Controller
         $book->load(['category', 'reviews.user']);
 
         return view('user.books.show', compact('book'));
+    }
+
+    /**
+     * Display the specified book for admin.
+     */
+    public function show(Book $book)
+    {
+        $book->load(['category', 'borrows.user']);
+        return view('admin.books.show', compact('book'));
     }
 }
