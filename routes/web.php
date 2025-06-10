@@ -1,11 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BorrowController;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReviewController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CometChatController;
 
 // Guest routes
 Route::middleware(['guest'])->group(function () {
@@ -66,6 +67,7 @@ Route::middleware(['auth', 'role:user'])->name('user.')->prefix('user')->group(f
 // Common authenticated routes
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/cometchat/token', [CometChatController::class, 'getAuthToken'])->name('cometchat.token');
 });
 
 // Public routes

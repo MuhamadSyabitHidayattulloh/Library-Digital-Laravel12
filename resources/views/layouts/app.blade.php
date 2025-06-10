@@ -229,5 +229,11 @@
             </div>
         </div>
     </footer>
+
+    <!-- Include CometChat Widget -->
+    @include('components.cometchat-widget')
+
+    <!-- Stack any additional scripts -->
+    @stack('scripts')
 </body>
 </html>
