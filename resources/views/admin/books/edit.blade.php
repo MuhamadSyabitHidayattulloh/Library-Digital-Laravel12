@@ -51,7 +51,7 @@
 
             <div>
                 <label class="block text-gray-700 font-medium mb-2" for="publication_year">Publication Year</label>
-                <input type="number" name="publication_year" id="publication_year" 
+                <input type="number" name="publication_year" id="publication_year"
                     value="{{ old('publication_year', $book->publication_year) }}" required min="1900" max="{{ date('Y') }}"
                     class="w-full px-3 py-2 border rounded-lg @error('publication_year') border-red-500 @enderror">
                 @error('publication_year')
@@ -63,7 +63,7 @@
                 <label class="block text-gray-700 font-medium mb-2" for="category_id">Category</label>
                 <select name="category_id" id="category_id" required class="w-full px-3 py-2 border rounded-lg @error('category_id') border-red-500 @enderror">
                     @foreach($categories as $category)
-                        <option value="{{ $category->id }}" 
+                        <option value="{{ $category->id }}"
                             {{ old('category_id', $book->category_id) == $category->id ? 'selected' : '' }}>
                             {{ $category->name }}
                         </option>
@@ -85,7 +85,7 @@
 
             <div class="col-span-2">
                 <label class="block text-gray-700 font-medium mb-2" for="description">Description</label>
-                <textarea name="description" id="description" rows="4" 
+                <textarea name="description" id="description" rows="4"
                     class="w-full px-3 py-2 border rounded-lg @error('description') border-red-500 @enderror">{{ old('description', $book->description) }}</textarea>
                 @error('description')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -94,7 +94,7 @@
         </div>
 
         <div class="mt-6 flex justify-end space-x-3">
-            <a href="{{ route('books.index') }}" 
+            <a href="{{ route('books.index') }}"
                 class="px-4 py-2 text-gray-700 hover:text-gray-900">
                 Cancel
             </a>

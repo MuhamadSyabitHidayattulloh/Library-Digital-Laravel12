@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Book;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Borrow;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,13 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
+        // Create admin and default user
         User::factory()->create([
             'name' => 'Admin',
             'email' => 'admin@example.com',
@@ -29,6 +25,23 @@ class DatabaseSeeder extends Seeder
             'name' => 'User',
             'email' => 'user@example.com',
             'role' => 'user',
+        ]);
+
+        // Create regular users
+        User::factory(8)->create();
+
+        // Create categories
+        Category::factory(10)->create();
+
+        // Create books with existing categories
+        Book::factory(50)->create([
+            'category_id' => fn() => Category::inRandomOrder()->first()->id
+        ]);
+
+        // Create borrows with existing users and books
+        Borrow::factory(30)->create([
+            'user_id' => fn() => User::where('role', 'user')->inRandomOrder()->first()->id,
+            'book_id' => fn() => Book::inRandomOrder()->first()->id
         ]);
     }
 }

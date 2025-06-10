@@ -3,108 +3,138 @@
 @section('title', 'Browse Books')
 
 @section('user-content')
-<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <h1 class="text-2xl font-semibold text-gray-800">Browse Books</h1>
-    <div class="flex items-center gap-4">
-        <!-- Search Bar -->
-        <div class="relative">
-            <input type="text" id="search" name="search"
-                class="w-64 pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                placeholder="Search books..."
-                value="{{ request('search') }}">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                <i class="ph-magnifying-glass-bold"></i>
-            </div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header with Search -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Digital Library Collection</h1>
+            <p class="mt-1 text-sm text-gray-600">Discover and borrow from our collection of books</p>
         </div>
 
-        <!-- Category Filter -->
-        <select id="category-filter"
-            class="pl-4 pr-10 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
-            <option value="">All Categories</option>
-            @foreach(\App\Models\Category::all() as $category)
-                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                    {{ $category->name }}
-                </option>
-            @endforeach
-        </select>
+        <!-- Search and Filters -->
+        <div class="flex flex-col sm:flex-row gap-3">
+            <div class="relative">
+                <input type="text" id="search"
+                    class="w-full sm:w-64 pl-10 pr-4 py-2 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    placeholder="Search books...">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="ph-magnifying-glass-bold text-gray-400"></i>
+                </div>
+            </div>
+            <select id="category-filter"
+                class="pl-4 pr-10 py-2 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                <option value="">All Categories</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+            </select>
+        </div>
     </div>
-</div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    @forelse($books as $book)
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all">
-        <div class="p-6">
-            <!-- Book Header -->
-            <div class="flex items-start justify-between mb-4">
-                <div>
-                    <h3 class="text-lg font-medium text-gray-900">{{ $book->title }}</h3>
-                    <p class="text-sm text-gray-600">by {{ $book->author }}</p>
-                </div>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-800">
-                    {{ $book->category->name }}
-                </span>
-            </div>
-
-            <!-- Book Details -->
-            <div class="space-y-3">
-                <p class="text-sm text-gray-600 line-clamp-2">{{ $book->description }}</p>
-
-                <div class="flex items-center text-sm text-gray-500">
-                    <i class="ph-books-bold mr-2"></i>
-                    <span>{{ $book->stock }} copies available</span>
-                </div>
-
-                <div class="flex items-center text-sm text-gray-500">
-                    <i class="ph-calendar-bold mr-2"></i>
-                    <span>Published: {{ $book->publication_year }}</span>
-                </div>
-
-                @if($book->publisher)
-                <div class="flex items-center text-sm text-gray-500">
-                    <i class="ph-building-bold mr-2"></i>
-                    <span>{{ $book->publisher }}</span>
-                </div>
-                @endif
-            </div>
-
-            <!-- Action Button -->
-            <div class="mt-6 flex space-x-3">
-                <a href="{{ route('user.books.show', $book) }}"
-                    class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-all">
-                    <i class="ph-eye-bold mr-2"></i>
-                    View Details
-                </a>
-                @if($book->stock > 0)
-                    <button onclick="showBorrowModal({{ $book->id }})"
-                        class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-all">
-                        <i class="ph-bookmark-simple-bold mr-2"></i>
-                        Borrow
-                    </button>
+    <!-- Books Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        @forelse($books as $book)
+        <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden">
+            <!-- Book Cover with Gradient Overlay -->
+            <div class="relative aspect-[4/5] bg-gradient-to-br from-blue-50 to-indigo-50 overflow-hidden">
+                @if($book->cover_image)
+                    <img src="{{ $book->cover_image }}" alt="{{ $book->title }}"
+                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 @else
-                    <button disabled
-                        class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-400 text-sm font-medium rounded-lg cursor-not-allowed">
-                        <i class="ph-prohibit-bold mr-2"></i>
-                        Out of Stock
-                    </button>
+                    <div class="w-full h-full flex items-center justify-center">
+                        <div class="flex flex-col items-center text-gray-400 transform transition-transform group-hover:scale-110">
+                            <i class="ph-book-bold text-6xl mb-2"></i>
+                            <span class="text-sm font-medium">No Cover</span>
+                        </div>
+                    </div>
                 @endif
-            </div>
-        </div>
-    </div>
-    @empty
-    <div class="col-span-full">
-        <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
-            <div class="p-3 bg-gray-50 rounded-full inline-flex mb-4">
-                <i class="ph-books-bold text-3xl text-gray-400"></i>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900">No books found</h3>
-            <p class="text-sm text-gray-500 mt-1">Try adjusting your search or filter criteria</p>
-        </div>
-    </div>
-    @endforelse
-</div>
 
-<div class="mt-6">
-    {{ $books->appends(request()->query())->links() }}
+                <!-- Status Badge -->
+                <div class="absolute top-3 right-3">
+                    @if($book->stock > 0)
+                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 shadow-lg backdrop-blur-sm bg-opacity-90">
+                            Available
+                        </span>
+                    @else
+                        <span class="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 shadow-lg backdrop-blur-sm bg-opacity-90">
+                            Borrowed
+                        </span>
+                    @endif
+                </div>
+
+                <!-- Category Badge -->
+                <div class="absolute top-3 left-3">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 shadow-lg backdrop-blur-sm bg-opacity-90">
+                        {{ $book->category->name }}
+                    </span>
+                </div>
+
+                <!-- Quick Info Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div class="absolute bottom-0 left-0 right-0 p-4">
+                        <p class="text-white text-sm line-clamp-3">{{ $book->description ?: 'No description available.' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Book Info -->
+            <div class="p-4 flex-1 flex flex-col">
+                <div class="flex-1">
+                    <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+                        {{ $book->title }}
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-1">by {{ $book->author }}</p>
+                </div>
+
+                <!-- Stats -->
+                <div class="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                    <span class="flex items-center">
+                        <i class="ph-books-bold mr-1"></i>
+                        {{ $book->stock }} copies
+                    </span>
+                    <span class="flex items-center">
+                        <i class="ph-calendar-bold mr-1"></i>
+                        {{ $book->publication_year }}
+                    </span>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+                    <a href="{{ route('user.books.show', $book) }}"
+                        class="flex-1 inline-flex justify-center items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors">
+                        Details
+                    </a>
+                    @if($book->stock > 0)
+                        <button onclick="showBorrowModal({{ $book->id }})"
+                            class="flex-1 inline-flex justify-center items-center px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                            Borrow
+                        </button>
+                    @else
+                        <button disabled
+                            class="flex-1 inline-flex justify-center items-center px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed">
+                            Unavailable
+                        </button>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @empty
+        <div class="col-span-full">
+            <div class="text-center py-12">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="ph-books-bold text-3xl text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">No books found</h3>
+                <p class="text-gray-500 mt-2">Try adjusting your search or filter criteria</p>
+            </div>
+        </div>
+        @endforelse
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-8">
+        {{ $books->links() }}
+    </div>
 </div>
 
 <!-- Borrow Modal -->

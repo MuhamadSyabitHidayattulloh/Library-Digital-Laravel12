@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class BookController extends Controller
 {
@@ -70,7 +69,9 @@ class BookController extends Controller
         }
 
         $books = $query->latest()->paginate(12);
-        return view('user.books.index', compact('books'));
+        $categories = Category::all(); // Add this line
+
+        return view('user.books.index', compact('books', 'categories'));
     }
 
     /**
@@ -101,12 +102,19 @@ class BookController extends Controller
         Book::create($validated);
         return redirect()->route('admin.books.index')->with('success', 'Book added successfully!');
     }
+
+    /**
+     * Show the form for editing the specified book.
+     */
     public function edit(Book $book)
     {
         $categories = Category::all();
         return view('admin.books.edit', compact('book', 'categories'));
     }
 
+    /**
+     * Update the specified book in storage.
+     */
     public function update(Request $request, Book $book)
     {
         $validated = $request->validate([
@@ -127,26 +135,11 @@ class BookController extends Controller
     /**
      * Remove the specified book from storage.
      */
-    public function show(Book $book)
-    {
-        $book->load(['category', 'borrows' => function($query) {
-            $query->with('user')->latest();
-        }]);
-        return view('admin.books.show', compact('book'));
-    }
-
-    public function userShow(Book $book)
-    {
-        $book->load('category');
-        return view('user.books.show', compact('book'));
-    }
-
     public function destroy(Book $book)
     {
         if ($book->borrows()->where('status', 'borrowed')->exists()) {
             return back()->withErrors(['error' => 'Cannot delete book that is currently borrowed!']);
         }
-
         $book->delete();
         return redirect()->route('admin.books.index')->with('success', 'Book deleted successfully!');
     }
