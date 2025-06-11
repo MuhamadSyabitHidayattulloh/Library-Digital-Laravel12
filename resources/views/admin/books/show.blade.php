@@ -193,15 +193,44 @@
 
             <!-- Book Reviews -->
             <div class="mt-8">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Book Reviews</h3>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Book Reviews</h3>
+                    <div class="flex items-center gap-2">
+                        <div class="flex text-yellow-400 text-xl">
+                            @php
+                                $avgRating = $book->reviews->avg('rating') ?? 0;
+                                $fullStars = floor($avgRating);
+                                $halfStar = $avgRating - $fullStars > 0.5;
+                            @endphp
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= $fullStars)
+                                    <i class="ph-star-fill"></i>
+                                @elseif($i == $fullStars + 1 && $halfStar)
+                                    <i class="ph-star-half-fill"></i>
+                                @else
+                                    <i class="ph-star text-gray-300"></i>
+                                @endif
+                            @endfor
+                        </div>
+                        <span class="text-lg font-medium text-gray-900">{{ number_format($avgRating, 1) }}</span>
+                        <span class="text-sm text-gray-500">({{ $book->reviews->count() }} reviews)</span>
+                    </div>
+                </div>
+
                 <div class="space-y-4">
-                    @forelse($book->reviews as $review)
-                        <div class="bg-gray-50 rounded-xl p-6">
+                    <!-- Pinned Reviews -->
+                    @forelse($book->reviews->where('pinned', true) as $review)
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-6">
                             <div class="flex items-start justify-between">
-                                <div>
+                                <div class="flex-1">
+                                    <!-- Pinned Badge -->
+                                    <div class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mb-3">
+                                        <i class="ph-push-pin-fill mr-1"></i>
+                                        Pinned Review
+                                    </div>
+
                                     <!-- Rating and Date -->
                                     <div class="flex items-center gap-2 mb-2">
-                                        <!-- Stars -->
                                         <div class="flex text-yellow-400">
                                             @for($i = 1; $i <= 5; $i++)
                                                 @if($i <= $review->rating)
@@ -224,6 +253,79 @@
 
                                     <!-- Review Text -->
                                     <p class="text-gray-600">{{ $review->comment }}</p>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex items-start gap-2">
+                                    <form action="{{ route('admin.reviews.unpin', $review) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="text-blue-600 hover:text-blue-800" title="Unpin Review">
+                                            <i class="ph-push-pin-slash-bold text-lg"></i>
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('admin.reviews.destroy', $review) }}" method="POST" class="inline"
+                                        onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-800" title="Delete Review">
+                                            <i class="ph-trash-bold text-lg"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                    @endforelse
+
+                    <!-- Unpinned Reviews -->
+                    @forelse($book->reviews->where('pinned', false) as $review)
+                        <div class="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition-colors">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <!-- Rating and Date -->
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex text-yellow-400">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                @if($i <= $review->rating)
+                                                    <i class="ph-star-fill"></i>
+                                                @else
+                                                    <i class="ph-star text-gray-300"></i>
+                                                @endif
+                                            @endfor
+                                        </div>
+                                        <span class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
+                                    </div>
+
+                                    <!-- User Info -->
+                                    <div class="mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-medium text-gray-900">{{ $review->user->name }}</span>
+                                            <span class="text-sm text-gray-500">{{ $review->user->email }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Review Text -->
+                                    <p class="text-gray-600">{{ $review->comment }}</p>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex items-start gap-2">
+                                    <form action="{{ route('admin.reviews.pin', $review) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="text-gray-400 hover:text-blue-600" title="Pin Review">
+                                            <i class="ph-push-pin-bold text-lg"></i>
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('admin.reviews.destroy', $review) }}" method="POST" class="inline"
+                                        onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-gray-400 hover:text-red-600" title="Delete Review">
+                                            <i class="ph-trash-bold text-lg"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\BorrowController;
@@ -44,6 +45,13 @@ Route::middleware(['auth'])->group(function () {
             Route::post('{borrow}/approve', [BorrowController::class, 'approve'])->name('approve');
             Route::post('{borrow}/return', [BorrowController::class, 'return'])->name('return');
             Route::get('/print/history', [BorrowController::class, 'printHistory'])->name('print.history');
+        });
+
+        // Reviews management
+        Route::group(['prefix' => 'reviews', 'as' => 'reviews.'], function () {
+            Route::patch('{review}/pin', [AdminReviewController::class, 'pin'])->name('pin');
+            Route::patch('{review}/unpin', [AdminReviewController::class, 'unpin'])->name('unpin');
+            Route::delete('{review}', [AdminReviewController::class, 'destroy'])->name('destroy');
         });
     });
 

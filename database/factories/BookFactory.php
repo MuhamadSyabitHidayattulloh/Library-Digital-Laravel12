@@ -17,6 +17,7 @@ class BookFactory extends Factory
             'isbn' => fake()->isbn13(),
             'stock' => fake()->numberBetween(1, 20),
             'category_id' => \App\Models\Category::factory(),
+            'cover_url' => fake()->imageUrl(640, 960, 'books', true),
         ];
     }
 }

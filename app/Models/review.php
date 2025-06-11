@@ -11,7 +11,8 @@ class Review extends Model
         'user_id',
         'book_id',
         'rating',
-        'comment'
+        'comment',
+        'pinned'
     ];
 
     /**

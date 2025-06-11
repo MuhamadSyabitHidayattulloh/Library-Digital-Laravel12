@@ -104,7 +104,7 @@ class BookController extends Controller
 
         if ($request->cover_type === 'file' && $request->hasFile('cover_file')) {
             $path = $request->file('cover_file')->store('covers', 'public');
-            $validated['cover_url'] = asset('storage/' . $path);
+            $validated['cover_url'] = '/storage/' . $path;
         }
 
         Book::create($validated);
@@ -141,7 +141,7 @@ class BookController extends Controller
 
         if ($request->cover_type === 'file' && $request->hasFile('cover_file')) {
             $path = $request->file('cover_file')->store('covers', 'public');
-            $validated['cover_url'] = asset('storage/' . $path);
+            $validated['cover_url'] = '/storage/' . $path;
         } elseif ($request->cover_type === 'none') {
             $validated['cover_url'] = null;
         }
