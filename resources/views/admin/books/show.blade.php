@@ -190,6 +190,51 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Book Reviews -->
+            <div class="mt-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Book Reviews</h3>
+                <div class="space-y-4">
+                    @forelse($book->reviews as $review)
+                        <div class="bg-gray-50 rounded-xl p-6">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <!-- Rating and Date -->
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <!-- Stars -->
+                                        <div class="flex text-yellow-400">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                @if($i <= $review->rating)
+                                                    <i class="ph-star-fill"></i>
+                                                @else
+                                                    <i class="ph-star text-gray-300"></i>
+                                                @endif
+                                            @endfor
+                                        </div>
+                                        <span class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
+                                    </div>
+
+                                    <!-- User Info -->
+                                    <div class="mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-medium text-gray-900">{{ $review->user->name }}</span>
+                                            <span class="text-sm text-gray-500">{{ $review->user->email }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Review Text -->
+                                    <p class="text-gray-600">{{ $review->comment }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-8 bg-gray-50 rounded-xl">
+                            <div class="text-gray-500 mb-1">No reviews yet</div>
+                            <p class="text-sm text-gray-400">This book hasn't received any reviews</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -129,7 +129,29 @@
         <!-- Reviews Section -->
         <div class="border-t border-gray-200 mt-8 pt-8 px-6 pb-6">
             <div class="max-w-3xl mx-auto">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Reviews</h2>
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Reviews & Ratings</h2>
+                    <div class="flex items-center gap-2">
+                        <div class="flex text-yellow-400 text-xl">
+                            @php
+                                $avgRating = $book->reviews->avg('rating') ?? 0;
+                                $fullStars = floor($avgRating);
+                                $halfStar = $avgRating - $fullStars > 0.5;
+                            @endphp
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= $fullStars)
+                                    <i class="ph-star-fill"></i>
+                                @elseif($i == $fullStars + 1 && $halfStar)
+                                    <i class="ph-star-half-fill"></i>
+                                @else
+                                    <i class="ph-star text-gray-300"></i>
+                                @endif
+                            @endfor
+                        </div>
+                        <span class="text-lg font-medium text-gray-900">{{ number_format($avgRating, 1) }}</span>
+                        <span class="text-sm text-gray-500">({{ $book->reviews->count() }} reviews)</span>
+                    </div>
+                </div>
 
                 <!-- Review Form -->
                 <div class="bg-gray-50 rounded-xl p-6 mb-8">
@@ -143,11 +165,14 @@
                             <div class="flex items-center space-x-2">
                                 @for($i = 1; $i <= 5; $i++)
                                     <label class="cursor-pointer">
-                                        <input type="radio" name="rating" value="{{ $i }}" class="hidden peer">
+                                        <input type="radio" name="rating" value="{{ $i }}" class="hidden peer" required>
                                         <i class="ph-star-bold text-2xl peer-checked:text-yellow-400 text-gray-300 hover:text-yellow-400 transition-colors"></i>
                                     </label>
                                 @endfor
                             </div>
+                            @error('rating')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div>
@@ -157,10 +182,14 @@
                             <textarea id="comment" name="comment" rows="4" required
                                 class="w-full px-4 py-2 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                 placeholder="Share your thoughts about this book..."></textarea>
+                            @error('comment')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                            class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                            <i class="ph-paper-plane-right-bold mr-2"></i>
                             Submit Review
                         </button>
                     </form>
@@ -168,11 +197,11 @@
 
                 <!-- Reviews List -->
                 <div class="space-y-6">
-                    @forelse($book->reviews as $review)
-                        <div class="bg-white rounded-xl shadow-sm p-6">
+                    @forelse($book->reviews()->with('user')->latest()->get() as $review)
+                        <div class="bg-white rounded-xl shadow-sm p-6 transition-all hover:shadow-md" id="review-{{ $review->id }}">
                             <div class="flex items-start justify-between mb-4">
                                 <div>
-                                    <div class="flex items-center mb-1">
+                                    <div class="flex items-center gap-3 mb-1">
                                         <!-- Stars -->
                                         <div class="flex text-yellow-400">
                                             @for($i = 1; $i <= 5; $i++)
@@ -183,23 +212,35 @@
                                                 @endif
                                             @endfor
                                         </div>
-                                        <span class="ml-2 text-sm text-gray-600">
+                                        <input type="hidden" class="review-rating" value="{{ $review->rating }}">
+                                        <div class="flex items-center gap-2 text-sm text-gray-500">
+                                            <i class="ph-clock text-gray-400"></i>
                                             {{ $review->created_at->diffForHumans() }}
-                                        </span>
+                                        </div>
                                     </div>
-                                    <p class="font-medium text-gray-900">{{ $review->user->name }}</p>
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-medium text-gray-900">{{ $review->user->name }}</p>
+                                        @if($review->user_id === auth()->id())
+                                            <span class="px-2 py-0.5 text-xs bg-blue-50 text-blue-600 rounded-full">Your Review</span>
+                                        @endif
+                                    </div>
                                 </div>
 
                                 @if($review->user_id === auth()->id())
-                                    <div class="flex items-center space-x-2">
+                                    <div class="flex items-center gap-2">
                                         <button onclick="editReview({{ $review->id }})"
-                                            class="text-sm text-blue-600 hover:text-blue-800">
+                                            class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
+                                            <i class="ph-pencil-simple mr-1"></i>
                                             Edit
                                         </button>
-                                        <form action="{{ route('user.reviews.destroy', $review) }}" method="POST" class="inline">
+                                        <form action="{{ route('user.reviews.destroy', $review) }}" method="POST"
+                                            onsubmit="return confirm('Are you sure you want to delete this review?');"
+                                            class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="text-sm text-red-600 hover:text-red-800">
+                                            <button type="submit"
+                                                class="text-sm text-red-600 hover:text-red-800 flex items-center">
+                                                <i class="ph-trash-simple mr-1"></i>
                                                 Delete
                                             </button>
                                         </form>
@@ -207,10 +248,20 @@
                                 @endif
                             </div>
 
-                            <p class="text-gray-600">{{ $review->comment }}</p>
+                            <div class="review-content">
+                                <p class="text-gray-600 review-comment">{{ $review->comment }}</p>
+                            </div>
                         </div>
                     @empty
-                        <p class="text-center text-gray-500 py-8">No reviews yet. Be the first to review this book!</p>
+                        <div class="text-center py-12 bg-gray-50 rounded-xl">
+                            <div class="text-gray-500 mb-2">No reviews yet</div>
+                            <p class="text-sm text-gray-400 mb-4">Be the first to share your thoughts about this book!</p>
+                            <button onclick="document.querySelector('#comment').focus()"
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="ph-pencil-simple-line-bold mr-2"></i>
+                                Write a Review
+                            </button>
+                        </div>
                     @endforelse
                 </div>
             </div>
@@ -246,6 +297,7 @@ function editReview(reviewId) {
     const form = document.createElement('form');
     form.action = `/user/reviews/${reviewId}`;
     form.method = 'POST';
+    form.className = 'space-y-4';
     form.innerHTML = `
         @csrf
         @method('PUT')
@@ -256,7 +308,7 @@ function editReview(reviewId) {
                     ${Array.from({length: 5}, (_, i) => `
                         <label class="cursor-pointer">
                             <input type="radio" name="rating" value="${i + 1}"
-                                ${rating == i + 1 ? 'checked' : ''} class="hidden peer">
+                                ${rating == i + 1 ? 'checked' : ''} class="hidden peer" required>
                             <i class="ph-star-bold text-2xl peer-checked:text-yellow-400 text-gray-300
                                 hover:text-yellow-400 transition-colors"></i>
                         </label>
@@ -269,14 +321,17 @@ function editReview(reviewId) {
                     class="w-full px-4 py-2 rounded-lg border-gray-300 focus:border-blue-500
                     focus:ring-2 focus:ring-blue-200">${comment}</textarea>
             </div>
-            <div class="flex space-x-2">
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg
-                    hover:bg-blue-700 transition-colors">
+            <div class="flex items-center gap-2">
+                <button type="submit"
+                    class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg
+                    hover:bg-blue-700 transition-colors flex items-center">
+                    <i class="ph-check-bold mr-2"></i>
                     Update Review
                 </button>
                 <button type="button" onclick="cancelEdit(${reviewId})"
                     class="px-4 py-2 bg-gray-200 text-gray-800 font-medium rounded-lg
-                    hover:bg-gray-300 transition-colors">
+                    hover:bg-gray-300 transition-colors flex items-center">
+                    <i class="ph-x-bold mr-2"></i>
                     Cancel
                 </button>
             </div>
