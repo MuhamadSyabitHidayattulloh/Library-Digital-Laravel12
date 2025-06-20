@@ -334,7 +334,12 @@
     </div>
 
     <!-- Enhanced Navigation -->
-    <nav class="bg-white/95 backdrop-blur-md shadow-soft sticky top-0 z-40 border-b border-gray-100">
+    @php
+        $isAdmin = request()->is('admin*');
+        $isUser = request()->is('user*');
+    @endphp
+    @if(!$isAdmin && !$isUser)
+    <nav class="bg-white/95 backdrop-blur-md shadow-soft sticky top-0 z-40 border-b border-gray-100" x-data="{ openNav: false }">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
@@ -346,7 +351,19 @@
                         <span class="font-heading hidden sm:inline">Library Digital</span>
                     </a>
                 </div>
-                <!-- Navigation Links -->
+                <!-- Hamburger Button (Mobile) -->
+                <div class="flex md:hidden">
+                    <button @click="openNav = !openNav" :aria-expanded="openNav ? 'true' : 'false'" aria-label="Open main menu"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-smooth">
+                        <svg x-show="!openNav" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <svg x-show="openNav" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Navigation Links (Desktop) -->
                 <div class="hidden md:flex items-center gap-8">
                     <a href="{{ route('home') }}" class="nav-link text-gray-800 font-medium transition-colors">Home</a>
                     <a href="{{ route('about') }}" class="nav-link text-gray-800 font-medium transition-colors">About</a>
@@ -364,8 +381,8 @@
                         @endif
                     @endauth
                 </div>
-                <!-- User Account -->
-                <div class="flex items-center gap-4">
+                <!-- User Account (Desktop) -->
+                <div class="hidden md:flex items-center gap-4">
                     @auth
                         <!-- User Menu -->
                         <div x-data="{ open: false }" class="relative">
@@ -402,8 +419,38 @@
                     @endauth
                 </div>
             </div>
+            <!-- Mobile Navigation Menu -->
+            <div x-show="openNav" x-transition class="md:hidden mt-2 bg-white rounded-lg shadow-card border border-gray-100 p-4">
+                <div class="flex flex-col gap-4">
+                    <a href="{{ route('home') }}" class="nav-link text-gray-800 font-medium transition-colors">Home</a>
+                    <a href="{{ route('about') }}" class="nav-link text-gray-800 font-medium transition-colors">About</a>
+                    <a href="{{ route('services') }}" class="nav-link text-gray-800 font-medium transition-colors">Services</a>
+                    <a href="{{ route('contact') }}" class="nav-link text-gray-800 font-medium transition-colors">Contact</a>
+                    @auth
+                        @if(Auth::user()->role === 'admin')
+                            <a href="{{ route('admin.dashboard') }}" class="nav-link text-blue-700 font-semibold transition-colors flex items-center gap-1">
+                                <i class="ph-gauge-bold"></i> Dashboard
+                            </a>
+                        @elseif(Auth::user()->role === 'user')
+                            <a href="{{ route('user.dashboard') }}" class="nav-link text-blue-700 font-semibold transition-colors flex items-center gap-1">
+                                <i class="ph-gauge-bold"></i> Dashboard
+                            </a>
+                        @endif
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600 transition-colors flex items-center gap-2 mt-2">
+                                <i class="ph-sign-out-bold"></i> Logout
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-blue-600 font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition-smooth">Login</a>
+                        <a href="{{ route('register') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-smooth font-medium shadow-sm hover:shadow-md">Register</a>
+                    @endauth
+                </div>
+            </div>
         </div>
     </nav>
+    @endif
 
     <!-- Flash Messages with animations -->
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
