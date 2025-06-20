@@ -34,7 +34,7 @@
     <!-- Books Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         @forelse($books as $book)
-        <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden">
+        <a href="{{ route('user.books.show', $book) }}" class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden cursor-pointer focus:ring-2 focus:ring-blue-400 outline-none">
             <!-- Book Cover with Gradient Overlay -->
             <div class="relative aspect-[4/5] bg-gradient-to-br from-blue-50 to-indigo-50 overflow-hidden">
                 @if($book->cover_url)
@@ -97,27 +97,8 @@
                         {{ $book->publication_year }}
                     </span>
                 </div>
-
-                <!-- Actions -->
-                <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
-                    <a href="{{ route('user.books.show', $book) }}"
-                        class="flex-1 inline-flex justify-center items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors">
-                        Details
-                    </a>
-                    @if($book->stock > 0)
-                        <button onclick="showBorrowModal({{ $book->id }})"
-                            class="flex-1 inline-flex justify-center items-center px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors">
-                            Borrow
-                        </button>
-                    @else
-                        <button disabled
-                            class="flex-1 inline-flex justify-center items-center px-4 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed">
-                            Unavailable
-                        </button>
-                    @endif
-                </div>
             </div>
-        </div>
+        </a>
         @empty
         <div class="col-span-full">
             <div class="text-center py-12">
