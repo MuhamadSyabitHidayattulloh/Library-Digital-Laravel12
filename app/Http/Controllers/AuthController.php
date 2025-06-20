@@ -33,9 +33,9 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             if (Auth::user()->role === 'admin') {
-                return redirect()->route('admin.dashboard')->with('success', 'Welcome back, Admin!');
+                return redirect()->route('admin.dashboard')->with('success', 'Welcome back, ' . Auth::user()->name . '!');
             } elseif (Auth::user()->role === 'user') {
-                return redirect()->route('user.dashboard')->with('success', 'Welcome back, User!');
+                return redirect()->route('user.dashboard')->with('success', 'Welcome back, ' . Auth::user()->name . '!');
             }
         }
 
